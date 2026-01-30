@@ -5,6 +5,10 @@
 #include "renderer.h"
 #include <cstring>
 
+// Include stb_image for texture loading
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 // Global renderer pointer
 Renderer* g_Renderer = nullptr;
 
@@ -127,11 +131,25 @@ Texture::~Texture() {
 }
 
 bool Texture::LoadFromFile(const std::string& filepath) {
-    // For simplicity, we'll create a placeholder texture
-    // In a full implementation, you would use stb_image here
-    std::cerr << "Note: Texture loading from file not implemented, using placeholder for: " 
-              << filepath << std::endl;
-    return CreateSolid(64, 64, Colors::WHITE);
+    // Use stb_image to load the texture
+    int w, h, ch;
+    stbi_set_flip_vertically_on_load(true); // OpenGL expects texture origin at bottom-left
+    unsigned char* data = stbi_load(filepath.c_str(), &w, &h, &ch, 0);
+    
+    if (!data) {
+        std::cerr << "Failed to load texture: " << filepath << " - " << stbi_failure_reason() << std::endl;
+        return false;
+    }
+    
+    bool success = CreateFromData(data, w, h, ch);
+    stbi_image_free(data);
+    
+    if (success) {
+        std::cout << "Successfully loaded texture: " << filepath 
+                  << " (" << w << "x" << h << ", " << ch << " channels)" << std::endl;
+    }
+    
+    return success;
 }
 
 bool Texture::CreateFromData(unsigned char* data, int w, int h, int ch) {

@@ -92,6 +92,11 @@ bool Game::Initialize() {
     
     g_Renderer = &renderer;
     
+    // Load textures
+    if (!enemyTexture.LoadFromFile("assets/textures/tie-fighter.png")) {
+        std::cerr << "Warning: Failed to load enemy texture, using solid colors" << std::endl;
+    }
+    
     // Load high scores
     LoadHighScores();
     

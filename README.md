@@ -157,5 +157,3 @@ MIT License - See LICENSE file for details.
 - Built with: C++17, OpenGL 3.3, GLFW, GLM
 
 ---
-
-**Enjoy the game and survive as long as you can!** 🚀

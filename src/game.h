@@ -49,6 +49,7 @@ public:
     WeaponManager* GetWeaponManager() { return &weaponManager; }
     GameState GetState() const { return gameState; }
     float GetGameTime() const { return gameTime; }
+    Texture* GetEnemyTexture() { return &enemyTexture; }
     
 private:
     // Core loop
@@ -99,6 +100,9 @@ private:
     
     // Renderer
     Renderer renderer;
+    
+    // Textures
+    Texture enemyTexture;
     
     // Game systems
     EntityManager entityManager;

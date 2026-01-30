@@ -381,12 +381,24 @@ void BasicEnemy::UpdateBehavior(float deltaTime, Game* game) {
 }
 
 void BasicEnemy::Render(Renderer* renderer) {
-    // Simple enemy shape
-    renderer->DrawSpriteWorld(position, size, rotation, color, nullptr);
+    // Get the enemy texture from the game
+    Texture* enemyTex = nullptr;
+    if (g_Game) {
+        enemyTex = g_Game->GetEnemyTexture();
+    }
     
-    // Eye/core
-    glm::vec4 coreColor = glm::vec4(1.0f, 0.8f, 0.3f, 1.0f);
-    renderer->DrawSpriteWorld(position, size * 0.3f, rotation, coreColor, nullptr);
+    // Render the enemy with texture if available, otherwise use solid color
+    if (enemyTex && enemyTex->textureID != 0) {
+        // Scale up 4x and use white color to preserve original texture colors
+        renderer->DrawSpriteWorld(position, size * 4.0f, rotation, Colors::WHITE, enemyTex);
+    } else {
+        // Fallback to solid color rendering
+        renderer->DrawSpriteWorld(position, size, rotation, color, nullptr);
+        
+        // Eye/core
+        glm::vec4 coreColor = glm::vec4(1.0f, 0.8f, 0.3f, 1.0f);
+        renderer->DrawSpriteWorld(position, size * 0.3f, rotation, coreColor, nullptr);
+    }
     
     RenderHealthBar(renderer);
 }

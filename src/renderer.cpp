@@ -492,7 +492,7 @@ void Renderer::InitStarfield(int starCount) {
 }
 
 void Renderer::BeginFrame() {
-    glClearColor(0.02f, 0.02f, 0.08f, 1.0f); // Dark space blue
+    glClearColor(0.01f, 0.01f, 0.04f, 1.0f); // Dark space blue
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -572,6 +572,11 @@ void Renderer::DrawSprite(const glm::vec2& position, const glm::vec2& size, floa
 
 void Renderer::DrawSpriteWorld(const glm::vec2& position, const glm::vec2& size, float rotation,
                               const glm::vec4& color, Texture* texture) {
+    DrawSpriteWorld(position, size, rotation, color, texture, false);
+}
+
+void Renderer::DrawSpriteWorld(const glm::vec2& position, const glm::vec2& size, float rotation,
+                              const glm::vec4& color, Texture* texture, bool flipHorizontal) {
     spriteShader.Use();
     
     glm::mat4 model = glm::mat4(1.0f);
@@ -596,12 +601,15 @@ void Renderer::DrawSpriteWorld(const glm::vec2& position, const glm::vec2& size,
         spriteShader.SetInt("useTexture", 0);
     }
     
-    // Update vertex colors
+    // Update vertex colors and flip texture coordinates if needed
+    float texLeft = flipHorizontal ? 1.0f : 0.0f;
+    float texRight = flipHorizontal ? 0.0f : 1.0f;
+    
     float vertices[] = {
-        -0.5f, -0.5f,  0.0f, 0.0f,  color.r, color.g, color.b, color.a,
-         0.5f, -0.5f,  1.0f, 0.0f,  color.r, color.g, color.b, color.a,
-         0.5f,  0.5f,  1.0f, 1.0f,  color.r, color.g, color.b, color.a,
-        -0.5f,  0.5f,  0.0f, 1.0f,  color.r, color.g, color.b, color.a
+        -0.5f, -0.5f,  texLeft, 0.0f,  color.r, color.g, color.b, color.a,
+         0.5f, -0.5f,  texRight, 0.0f,  color.r, color.g, color.b, color.a,
+         0.5f,  0.5f,  texRight, 1.0f,  color.r, color.g, color.b, color.a,
+        -0.5f,  0.5f,  texLeft, 1.0f,  color.r, color.g, color.b, color.a
     };
     
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);

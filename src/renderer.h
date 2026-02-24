@@ -127,6 +127,8 @@ public:
                    const glm::vec4& color, Texture* texture = nullptr);
     void DrawSpriteWorld(const glm::vec2& position, const glm::vec2& size, float rotation,
                         const glm::vec4& color, Texture* texture = nullptr);
+    void DrawSpriteWorld(const glm::vec2& position, const glm::vec2& size, float rotation,
+                        const glm::vec4& color, Texture* texture, bool flipHorizontal);
     
     // Shape rendering (using sprite quad with white texture)
     void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);

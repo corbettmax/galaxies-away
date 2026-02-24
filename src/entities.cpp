@@ -387,10 +387,15 @@ void BasicEnemy::Render(Renderer* renderer) {
         enemyTex = g_Game->GetEnemyTexture();
     }
     
+    // Determine facing direction based on velocity
+    // Flip horizontally when facing left (negative x velocity)
+    bool facingLeft = velocity.x < 0.0f;
+    
     // Render the enemy with texture if available, otherwise use solid color
     if (enemyTex && enemyTex->textureID != 0) {
-        // Scale up 4x and use white color to preserve original texture colors
-        renderer->DrawSpriteWorld(position, size * 4.0f, rotation, Colors::WHITE, enemyTex);
+        // Scale up 4x, use white color to preserve original texture colors
+        // No rotation (0.0f) to keep level with screen, flip based on direction
+        renderer->DrawSpriteWorld(position, size * 4.0f, 0.0f, Colors::WHITE, enemyTex, facingLeft);
     } else {
         // Fallback to solid color rendering
         renderer->DrawSpriteWorld(position, size, rotation, color, nullptr);

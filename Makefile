@@ -11,14 +11,16 @@ SRC_DIR := src
 BUILD_DIR := build
 SHADER_DIR := shaders
 ASSETS_DIR := assets
+ENTITIES_DIR := $(SRC_DIR)/entities
 
 # Source files
-SOURCES := $(wildcard $(SRC_DIR)/*.cpp)
-OBJECTS := $(SOURCES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(ENTITIES_DIR)/*.cpp)
+OBJECTS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(filter $(SRC_DIR)/%.cpp,$(SOURCES))) \
+           $(patsubst $(ENTITIES_DIR)/%.cpp,$(BUILD_DIR)/entities_%.o,$(filter $(ENTITIES_DIR)/%.cpp,$(SOURCES)))
 DEPENDS := $(OBJECTS:.o=.d)
 
 # Output executable
-TARGET := galaxies_away
+TARGET := galaxies_away.exe
 
 # Libraries
 # Detect OS
@@ -51,8 +53,12 @@ $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 	@echo "Build complete: $(TARGET)"
 
-# Compile
+# Compile main source files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
+
+# Compile entity files
+$(BUILD_DIR)/entities_%.o: $(ENTITIES_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
 
 # Include dependencies

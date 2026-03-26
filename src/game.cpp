@@ -401,7 +401,7 @@ void Game::RenderHUD() {
     
     // Timer (top center)
     std::string timeText = Utils::FormatTime(gameTime);
-    float timeWidth = timeText.length() * 12.0f;
+    float timeWidth = renderer.MeasureTextWidth(timeText, 1.2f);
     renderer.DrawText(timeText, glm::vec2((windowWidth - timeWidth) / 2, padding), 1.2f, Colors::WHITE);
     
     // Kill count (top right)
@@ -421,17 +421,17 @@ void Game::RenderHUD() {
 void Game::RenderMenu() {
     // Title
     std::string title = "GALAXIES AWAY";
-    float titleWidth = title.length() * 20.0f;
+    float titleWidth = renderer.MeasureTextWidth(title, 2.0f);
     renderer.DrawText(title, glm::vec2((windowWidth - titleWidth) / 2, 150), 2.0f, Colors::CYAN);
     
     // Subtitle
     std::string subtitle = "Space Roguelike Survival";
-    float subWidth = subtitle.length() * 10.0f;
+    float subWidth = renderer.MeasureTextWidth(subtitle, 1.0f);
     renderer.DrawText(subtitle, glm::vec2((windowWidth - subWidth) / 2, 210), 1.0f, Colors::WHITE);
     
     // Instructions
     std::string startText = "Press SPACE or ENTER to Start";
-    float startWidth = startText.length() * 10.0f;
+    float startWidth = renderer.MeasureTextWidth(startText, 1.0f);
     
     // Pulsing effect
     float pulse = 0.7f + 0.3f * std::sin(static_cast<float>(glfwGetTime()) * 3.0f);
@@ -466,13 +466,13 @@ void Game::RenderLevelUpMenu() {
     
     // Title
     std::string title = "LEVEL UP!";
-    float titleWidth = title.length() * 20.0f;
+    float titleWidth = renderer.MeasureTextWidth(title, 2.0f);
     renderer.DrawText(title, glm::vec2((windowWidth - titleWidth) / 2, 100), 2.0f, Colors::YELLOW);
     
     // Level info
     if (entityManager.player) {
         std::string levelText = "You reached Level " + std::to_string(entityManager.player->level);
-        float levelWidth = levelText.length() * 10.0f;
+        float levelWidth = renderer.MeasureTextWidth(levelText, 1.0f);
         renderer.DrawText(levelText, glm::vec2((windowWidth - levelWidth) / 2, 160), 1.0f, Colors::WHITE);
     }
     
@@ -509,7 +509,7 @@ void Game::RenderLevelUpMenu() {
     
     // Instructions
     std::string instructions = "Use W/S or 1-4 to select, SPACE/ENTER to confirm";
-    float instrWidth = instructions.length() * 8.0f;
+    float instrWidth = renderer.MeasureTextWidth(instructions, 0.8f);
     renderer.DrawText(instructions, glm::vec2((windowWidth - instrWidth) / 2, windowHeight - 50), 0.8f, Colors::WHITE);
 }
 
@@ -519,16 +519,16 @@ void Game::RenderPauseMenu() {
     
     // Pause text
     std::string pauseText = "PAUSED";
-    float pauseWidth = pauseText.length() * 25.0f;
+    float pauseWidth = renderer.MeasureTextWidth(pauseText, 2.5f);
     renderer.DrawText(pauseText, glm::vec2((windowWidth - pauseWidth) / 2, 250), 2.5f, Colors::WHITE);
     
     // Options
     std::string resumeText = "Press SPACE or ESC to Resume";
-    float resumeWidth = resumeText.length() * 10.0f;
+    float resumeWidth = renderer.MeasureTextWidth(resumeText, 1.0f);
     renderer.DrawText(resumeText, glm::vec2((windowWidth - resumeWidth) / 2, 350), 1.0f, Colors::CYAN);
     
     std::string quitText = "Press Q to Quit to Menu";
-    float quitWidth = quitText.length() * 10.0f;
+    float quitWidth = renderer.MeasureTextWidth(quitText, 1.0f);
     renderer.DrawText(quitText, glm::vec2((windowWidth - quitWidth) / 2, 390), 1.0f, Colors::WHITE);
 }
 
@@ -538,7 +538,7 @@ void Game::RenderGameOver() {
     
     // Game over text
     std::string gameOverText = "GAME OVER";
-    float goWidth = gameOverText.length() * 25.0f;
+    float goWidth = renderer.MeasureTextWidth(gameOverText, 2.5f);
     renderer.DrawText(gameOverText, glm::vec2((windowWidth - goWidth) / 2, 150), 2.5f, Colors::RED);
     
     // Stats
@@ -568,13 +568,13 @@ void Game::RenderGameOver() {
     
     // Options
     std::string retryText = "Press SPACE to Try Again";
-    float retryWidth = retryText.length() * 10.0f;
+    float retryWidth = renderer.MeasureTextWidth(retryText, 1.0f);
     float pulse = 0.7f + 0.3f * std::sin(static_cast<float>(glfwGetTime()) * 3.0f);
     renderer.DrawText(retryText, glm::vec2((windowWidth - retryWidth) / 2, statY), 1.0f, 
                       glm::vec4(1.0f, 1.0f, 1.0f, pulse));
     
     std::string menuText = "Press Q for Menu";
-    float menuWidth = menuText.length() * 10.0f;
+    float menuWidth = renderer.MeasureTextWidth(menuText, 0.9f);
     renderer.DrawText(menuText, glm::vec2((windowWidth - menuWidth) / 2, statY + 40), 0.9f, Colors::WHITE);
 }
 

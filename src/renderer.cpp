@@ -5,6 +5,9 @@
 #include "renderer.h"
 #include <cstring>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 // Include stb_image for texture loading
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -253,8 +256,11 @@ bool Renderer::Initialize(int width, int height) {
     // Initialize starfield
     InitStarfield(300);
     
-    // Initialize text rendering
-    InitTextRendering();
+    // Initialize text rendering (required)
+    if (!InitTextRendering()) {
+        std::cerr << "Failed to initialize FreeType text rendering" << std::endl;
+        return false;
+    }
     
     return true;
 }
@@ -375,12 +381,12 @@ void Renderer::InitParticleBuffers() {
     glBindVertexArray(0);
 }
 
-void Renderer::InitTextRendering() {
+bool Renderer::InitTextRendering() {
     // Initialize FreeType library
     if (FT_Init_FreeType(&ftLibrary)) {
         std::cerr << "Could not initialize FreeType library" << std::endl;
         fontInitialized = false;
-        return;
+        return false;
     }
     
     // Try to load a default system font
@@ -407,7 +413,7 @@ void Renderer::InitTextRendering() {
         FT_Done_FreeType(ftLibrary);
         ftLibrary = nullptr;
         fontInitialized = false;
-        return;
+        return false;
     }
     
     // Set font size (48 pixels height)
@@ -471,6 +477,7 @@ void Renderer::InitTextRendering() {
     
     fontInitialized = true;
     std::cout << "Text rendering initialized successfully" << std::endl;
+    return true;
 }
 
 void Renderer::InitStarfield(int starCount) {
@@ -691,24 +698,10 @@ void Renderer::DrawProgressBar(const glm::vec2& position, const glm::vec2& size,
 
 void Renderer::DrawText(const std::string& text, const glm::vec2& position, float scale, const glm::vec4& color) {
     if (!fontInitialized || characters.empty()) {
-        // Fallback to simple rectangle rendering if font not initialized
-        float charWidth = 10.0f * scale;
-        float charHeight = 16.0f * scale;
-        float spacing = 2.0f * scale;
-        glm::vec2 cursor = position;
-        
-        for (char c : text) {
-            if (c == ' ') {
-                cursor.x += charWidth + spacing;
-                continue;
-            }
-            if (c == '\n') {
-                cursor.x = position.x;
-                cursor.y += charHeight + spacing;
-                continue;
-            }
-            DrawRect(cursor, glm::vec2(charWidth, charHeight), color);
-            cursor.x += charWidth + spacing;
+        static bool warned = false;
+        if (!warned) {
+            std::cerr << "DrawText called before FreeType text rendering was initialized" << std::endl;
+            warned = true;
         }
         return;
     }
@@ -779,6 +772,32 @@ void Renderer::DrawText(const std::string& text, const glm::vec2& position, floa
     
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+float Renderer::MeasureTextWidth(const std::string& text, float scale) const {
+    if (!fontInitialized || characters.empty()) {
+        return 0.0f;
+    }
+
+    float currentLineWidth = 0.0f;
+    float maxLineWidth = 0.0f;
+
+    for (char c : text) {
+        if (c == '\n') {
+            maxLineWidth = std::max(maxLineWidth, currentLineWidth);
+            currentLineWidth = 0.0f;
+            continue;
+        }
+
+        auto it = characters.find(c);
+        if (it == characters.end()) {
+            continue;
+        }
+
+        currentLineWidth += (it->second.advance >> 6) * scale;
+    }
+
+    return std::max(maxLineWidth, currentLineWidth);
 }
 
 void Renderer::DrawStarfield(float time) {

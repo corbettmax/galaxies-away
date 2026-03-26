@@ -14,9 +14,9 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GLFW/glfw3.h>
 
-// Include FreeType for text rendering
-#include <ft2build.h>
-#include FT_FREETYPE_H
+// Forward declarations for FreeType handle types
+typedef struct FT_LibraryRec_* FT_Library;
+typedef struct FT_FaceRec_* FT_Face;
 
 // ============================================================================
 // Vertex Structure for Sprite Rendering
@@ -144,6 +144,7 @@ public:
     void DrawProgressBar(const glm::vec2& position, const glm::vec2& size, float progress,
                         const glm::vec4& fillColor, const glm::vec4& bgColor);
     void DrawText(const std::string& text, const glm::vec2& position, float scale, const glm::vec4& color);
+    float MeasureTextWidth(const std::string& text, float scale) const;
     
     // Background
     void DrawStarfield(float time);
@@ -165,7 +166,7 @@ public:
 private:
     void InitQuadBuffers();
     void InitParticleBuffers();
-    void InitTextRendering();
+    bool InitTextRendering();
     glm::mat4 GetProjectionMatrix() const;
     glm::mat4 GetViewMatrix() const;
     

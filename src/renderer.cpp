@@ -209,6 +209,8 @@ Renderer::Renderer()
     , ftLibrary(nullptr)
     , ftFace(nullptr)
     , fontInitialized(false)
+    , fontAscent(0.0f)
+    , fontLineHeight(60.0f)
 {
 }
 
@@ -418,6 +420,16 @@ bool Renderer::InitTextRendering() {
     
     // Set font size (48 pixels height)
     FT_Set_Pixel_Sizes(ftFace, 0, 48);
+
+    // Cache metrics for consistent text layout.
+    if (ftFace->size) {
+        fontAscent = static_cast<float>(ftFace->size->metrics.ascender >> 6);
+        fontLineHeight = static_cast<float>(ftFace->size->metrics.height >> 6);
+    }
+    // Safety for invalid values
+    if (fontLineHeight <= 0.0f) {
+        fontLineHeight = 48.0f;
+    }
     
     // Disable byte-alignment restriction
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -716,6 +728,7 @@ void Renderer::DrawText(const std::string& text, const glm::vec2& position, floa
     // Iterate through all characters
     float x = position.x;
     float y = position.y;
+    float baseline = y + fontAscent * scale;
     
     for (auto it = text.begin(); it != text.end(); ++it) {
         char c = *it;
@@ -723,7 +736,8 @@ void Renderer::DrawText(const std::string& text, const glm::vec2& position, floa
         // Handle newlines
         if (c == '\n') {
             x = position.x;
-            y -= 48.0f * scale; // Move down one line (font size is 48)
+            y += fontLineHeight * scale;
+            baseline = y + fontAscent * scale;
             continue;
         }
         
@@ -734,10 +748,9 @@ void Renderer::DrawText(const std::string& text, const glm::vec2& position, floa
         
         Character ch = characters[c];
         
-        // Calculate position
-        // In a top-down coordinate system (0 at top), we need to add bearing for correct baseline
+        // Calculate glyph quad from a stable baseline so letters line up correctly.
         float xpos = x + ch.bearing.x * scale;
-        float ypos = y + (ch.size.y - ch.bearing.y) * scale;
+        float ypos = baseline - ch.bearing.y * scale;
         
         float w = ch.size.x * scale;
         float h = ch.size.y * scale;
@@ -798,6 +811,11 @@ float Renderer::MeasureTextWidth(const std::string& text, float scale) const {
     }
 
     return std::max(maxLineWidth, currentLineWidth);
+}
+
+float Renderer::GetTextLineHeight(float scale) const {
+    float baseLineHeight = fontLineHeight > 0.0f ? fontLineHeight : 48.0f;
+    return baseLineHeight * scale;
 }
 
 void Renderer::DrawStarfield(float time) {

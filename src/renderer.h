@@ -145,6 +145,7 @@ public:
                         const glm::vec4& fillColor, const glm::vec4& bgColor);
     void DrawText(const std::string& text, const glm::vec2& position, float scale, const glm::vec4& color);
     float MeasureTextWidth(const std::string& text, float scale) const;
+    float GetTextLineHeight(float scale) const;
     
     // Background
     void DrawStarfield(float time);
@@ -207,6 +208,8 @@ private:
     FT_Face ftFace;
     std::map<char, Character> characters;
     bool fontInitialized;
+    float fontAscent;
+    float fontLineHeight;
 };
 
 // ============================================================================

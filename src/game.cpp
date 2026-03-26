@@ -373,6 +373,10 @@ void Game::RenderHUD() {
     float padding = 20.0f;
     float barHeight = 20.0f;
     float barWidth = 200.0f;
+    const float hudScale = 0.9f;
+    const float hudLineHeight = renderer.GetTextLineHeight(hudScale);
+    const float hudTextX = padding + barWidth + 10.0f;
+    const float hudTopTextY = padding;
     
     // Health bar
     if (entityManager.player) {
@@ -386,7 +390,7 @@ void Game::RenderHUD() {
         // Health text
         std::string healthText = "HP: " + std::to_string(static_cast<int>(player->health)) + 
                                 "/" + std::to_string(static_cast<int>(player->maxHealth));
-        renderer.DrawText(healthText, glm::vec2(padding + barWidth + 10, padding + 2), 0.9f, Colors::WHITE);
+        renderer.DrawText(healthText, glm::vec2(hudTextX, hudTopTextY), hudScale, Colors::WHITE);
         
         // XP bar
         glm::vec2 xpBarPos(padding, padding + barHeight + 10);
@@ -396,7 +400,7 @@ void Game::RenderHUD() {
         
         // Level text
         std::string levelText = "Lv." + std::to_string(player->level);
-        renderer.DrawText(levelText, glm::vec2(padding + barWidth + 10, padding + barHeight + 10), 0.9f, Colors::YELLOW);
+        renderer.DrawText(levelText, glm::vec2(hudTextX, hudTopTextY + hudLineHeight + 4.0f), hudScale, Colors::YELLOW);
     }
     
     // Timer (top center)
@@ -406,44 +410,58 @@ void Game::RenderHUD() {
     
     // Kill count (top right)
     std::string killText = "Kills: " + std::to_string(enemiesKilled);
-    float killWidth = killText.length() * 10.0f;
-    renderer.DrawText(killText, glm::vec2(windowWidth - killWidth - padding, padding), 0.9f, Colors::WHITE);
+    float killWidth = renderer.MeasureTextWidth(killText, hudScale);
+    renderer.DrawText(killText, glm::vec2(windowWidth - killWidth - padding, hudTopTextY), hudScale, Colors::WHITE);
     
     // Weapon info (bottom left)
-    float weaponY = windowHeight - padding - 20.0f;
+    const float weaponScale = 0.7f;
+    const float weaponStep = renderer.GetTextLineHeight(weaponScale) + 2.0f;
+    float weaponY = windowHeight - padding - weaponStep;
     for (int i = weaponManager.GetWeaponCount() - 1; i >= 0; --i) {
         std::string weaponDesc = weaponManager.weapons[i]->GetDescription();
-        renderer.DrawText(weaponDesc, glm::vec2(padding, weaponY), 0.7f, Colors::CYAN);
-        weaponY -= 18.0f;
+        renderer.DrawText(weaponDesc, glm::vec2(padding, weaponY), weaponScale, Colors::CYAN);
+        weaponY -= weaponStep;
     }
 }
 
 void Game::RenderMenu() {
+    const float titleScale = 2.0f;
+    const float subtitleScale = 1.0f;
+    const float bodyScale = 0.8f;
+
+    float titleY = 80.0f;
+
     // Title
     std::string title = "GALAXIES AWAY";
-    float titleWidth = renderer.MeasureTextWidth(title, 2.0f);
-    renderer.DrawText(title, glm::vec2((windowWidth - titleWidth) / 2, 150), 2.0f, Colors::CYAN);
+    float titleWidth = renderer.MeasureTextWidth(title, titleScale);
+    renderer.DrawText(title, glm::vec2((windowWidth - titleWidth) / 2, titleY), titleScale, Colors::CYAN);
     
     // Subtitle
     std::string subtitle = "Space Roguelike Survival";
-    float subWidth = renderer.MeasureTextWidth(subtitle, 1.0f);
-    renderer.DrawText(subtitle, glm::vec2((windowWidth - subWidth) / 2, 210), 1.0f, Colors::WHITE);
+    float subtitleY = titleY + renderer.GetTextLineHeight(titleScale) + 14.0f;
+    float subWidth = renderer.MeasureTextWidth(subtitle, subtitleScale);
+    renderer.DrawText(subtitle, glm::vec2((windowWidth - subWidth) / 2, subtitleY), subtitleScale, Colors::WHITE);
     
     // Instructions
     std::string startText = "Press SPACE or ENTER to Start";
-    float startWidth = renderer.MeasureTextWidth(startText, 1.0f);
+    float startY = subtitleY + renderer.GetTextLineHeight(subtitleScale) + 80.0f;
+    float startWidth = renderer.MeasureTextWidth(startText, subtitleScale);
     
     // Pulsing effect
     float pulse = 0.7f + 0.3f * std::sin(static_cast<float>(glfwGetTime()) * 3.0f);
     glm::vec4 startColor = glm::vec4(1.0f, 1.0f, 1.0f, pulse);
-    renderer.DrawText(startText, glm::vec2((windowWidth - startWidth) / 2, 350), 1.0f, startColor);
+    renderer.DrawText(startText, glm::vec2((windowWidth - startWidth) / 2, startY), subtitleScale, startColor);
     
     // Controls
-    renderer.DrawText("CONTROLS:", glm::vec2(100, 450), 1.0f, Colors::YELLOW);
-    renderer.DrawText("WASD / Arrow Keys - Move", glm::vec2(100, 480), 0.8f, Colors::WHITE);
-    renderer.DrawText("Weapons fire automatically", glm::vec2(100, 510), 0.8f, Colors::WHITE);
-    renderer.DrawText("Collect green orbs for XP", glm::vec2(100, 540), 0.8f, Colors::WHITE);
-    renderer.DrawText("ESC - Pause", glm::vec2(100, 570), 0.8f, Colors::WHITE);
+    float controlsHeaderY = startY + renderer.GetTextLineHeight(subtitleScale) + 65.0f;
+    float controlsTextY = controlsHeaderY + renderer.GetTextLineHeight(subtitleScale) + 8.0f;
+    float controlsStep = renderer.GetTextLineHeight(bodyScale) + 6.0f;
+
+    renderer.DrawText("CONTROLS:", glm::vec2(100, controlsHeaderY), subtitleScale, Colors::YELLOW);
+    renderer.DrawText("WASD / Arrow Keys - Move", glm::vec2(100, controlsTextY), bodyScale, Colors::WHITE);
+    renderer.DrawText("Weapons fire automatically", glm::vec2(100, controlsTextY + controlsStep), bodyScale, Colors::WHITE);
+    renderer.DrawText("Collect green orbs for XP", glm::vec2(100, controlsTextY + controlsStep * 2.0f), bodyScale, Colors::WHITE);
+    renderer.DrawText("ESC - Pause", glm::vec2(100, controlsTextY + controlsStep * 3.0f), bodyScale, Colors::WHITE);
     
     // High scores
     if (!highScores.empty()) {
@@ -467,17 +485,19 @@ void Game::RenderLevelUpMenu() {
     // Title
     std::string title = "LEVEL UP!";
     float titleWidth = renderer.MeasureTextWidth(title, 2.0f);
-    renderer.DrawText(title, glm::vec2((windowWidth - titleWidth) / 2, 100), 2.0f, Colors::YELLOW);
+    float titleY = 90.0f;
+    renderer.DrawText(title, glm::vec2((windowWidth - titleWidth) / 2, titleY), 2.0f, Colors::YELLOW);
     
     // Level info
+    float levelTextY = titleY + renderer.GetTextLineHeight(2.0f) + 14.0f;
     if (entityManager.player) {
         std::string levelText = "You reached Level " + std::to_string(entityManager.player->level);
         float levelWidth = renderer.MeasureTextWidth(levelText, 1.0f);
-        renderer.DrawText(levelText, glm::vec2((windowWidth - levelWidth) / 2, 160), 1.0f, Colors::WHITE);
+        renderer.DrawText(levelText, glm::vec2((windowWidth - levelWidth) / 2, levelTextY), 1.0f, Colors::WHITE);
     }
     
     // Choices
-    float choiceY = 230.0f;
+    float choiceY = levelTextY + renderer.GetTextLineHeight(1.0f) + 30.0f;
     float choiceWidth = 400.0f;
     float choiceHeight = 70.0f;
     float choiceX = (windowWidth - choiceWidth) / 2;
